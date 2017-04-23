@@ -165,4 +165,72 @@ contract('Debts', function(accounts) {
     .then(asserts.equal(value2));
   });
 
+  it('should expect 0 when use values < 1 < 0 when borrowing', () => {
+    const borrower = accounts[3];
+    const value = 0.1;
+    return Promise.resolve()
+    .then(() => debts.borrow(value, {from: borrower}))
+    .then(() => debts.debts(borrower))
+    .then(asserts.equal(0));
+  });
+
+  it('should expect 0 when use values < 1 < 0 when repaying', () => {
+    const borrower = accounts[3];
+    const value = 1000;
+    const value2 = 0.1;
+    return Promise.resolve()
+    .then(() => debts.borrow(value, {from: borrower}))
+    .then(() => debts.repay(borrower, value2, {from: OWNER}))
+    .then(() => debts.debts(borrower))
+    .then(asserts.equal(value));
+  });
+
+/*At the idea stage... maybe will be written correctly soon...
+
+  it('should fail when using address without quotes', () => {
+    const borrower = accounts[3];
+    const value = 1000;
+    return Promise.resolve()
+    .then(() => debts.borrow(value, {from: borrower}))
+    .then(() => debts.repay(0x84400d8d9a244482cb7a0a16060bfd42339bbd5b, 1000, {from: OWNER}))
+    .then(() => debts.debts(borrower))
+    .then(asserts.equal(value));
+  });
+
+  it('fail when try to use cyrillic word on same address', () => {
+    var borrower = "0x84400d8d9a244482cb7a0a16060bfd42339bbd5b";
+    var cyrillic = "0x84400d8d9a244482сb7a0a16060bfd42339bbd5b";
+    const value = 1000;
+    return Promise.resolve()
+    .then(() => debts.borrow(value, {from: borrower}))
+    .then(() => debts.borrow(value, {from: cyrillic}))
+    .then(() => debts.repay(borrower, value, {from: OWNER}))
+    .then(() => debts.repay(cyrillic, value, {from: OWNER}))
+    .then(() => debts.debts(borrower))
+    .then(asserts.equal(value));
+  });
+
+  it('fail when address is longer', () => {
+    const borrower = "0x2ddd3ebf344e93e68fd16e0eeb0a69e576148fcf1";
+    return Promise.resolve()
+    .then(() => asserts.throws(debts.repay(borrower, 1, {from: OWNER})))
+  });
+
+  it('fail when address is shorter', () => {
+    const borrower = "0x2ddd3ebf344e93e68fd16e0eeb0a69e576148fc";
+    return Promise.resolve()
+    .then(() => asserts.throws(debts.repay(borrower, 1, {from: OWNER})))
+  });
+
+  it('should fail on string type in amount when borrowing', () => {
+    const borrower = accounts[3];
+    const value = 1000;
+    return Promise.resolve()
+    .then(() => debts.borrow(value, {from: borrower}))
+    .then(() => debts.borrow('qwerty', {from: borrower}))
+    .then(() => debts.debts(borrower))
+    .then(asserts.equal(value));
+  });
+*/
+
 });
