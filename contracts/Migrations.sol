@@ -1,15 +1,15 @@
 pragma solidity 0.4.8;
 
 contract Migrations {
-    address public owner;
+    address public admin;
     uint public last_completed_migration;
 
     modifier restricted() {
-        if (msg.sender == owner) _;
+        if (msg.sender == admin) _;
     }
 
     function Migrations() {
-        owner = msg.sender;
+        admin = msg.sender;
     }
 
     function setCompleted(uint completed) restricted {

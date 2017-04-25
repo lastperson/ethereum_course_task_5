@@ -1,21 +1,21 @@
 const Reverter = require('./helpers/reverter');
 const Asserts = require('./helpers/asserts');
-const Debts = artifacts.require('./gamble.sol');
+const Tote = artifacts.require('./Tote.sol');
 
-contract('Debts', function(accounts) {
+contract('Tote', function(accounts) {
   const reverter = new Reverter(web3);
   afterEach('revert', reverter.revert);
 
   const asserts = Asserts(assert);
   const OWNER = accounts[0];
-  let debts;
+  let money;
 
   before('setup', () => {
-    return Debts.deployed()
-    .then(instance => debts = instance)
+    return Tote.deployed()
+    .then(instance => money = instance)
     .then(reverter.snapshot);
   });
 
-
+  it('soon');
 
 });
