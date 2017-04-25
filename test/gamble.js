@@ -16,6 +16,6 @@ contract('Tote', function(accounts) {
     .then(reverter.snapshot);
   });
 
-  it('soon');
+  it('soon...');
 
 });
