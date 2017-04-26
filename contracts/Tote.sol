@@ -28,6 +28,7 @@ contract Tote {
     
     event Event_was_created(uint a, string b, string c);
     event Bet_was_created(address c, uint a, uint b);
+    event Event_was_closed(string wn);
 
     uint id = 1;
     uint bet_id = 1;
@@ -115,9 +116,11 @@ contract Tote {
         for (uint j = 1; j <= (_safeAdd(_event[event_id].count_A, _event[event_id].count_B)); j++) {
             if(sha3(_bet[j].team) == sha3(_winner)) { 
                 cash = _bet[j].bet_value +((_bet[j].bet_value / _event[event_id].event_value) * win);
-                money[_bet[j].gambler] = cash;
+                money[_bet[j].gambler] = money[_bet[j].gambler] + cash;
             }
-        delete_event(event_id);
         }
+        _event[event_id].winner = _winner;    
+        delete_event(event_id);
+        Event_was_closed(_winner);    
     }
 }
