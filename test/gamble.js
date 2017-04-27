@@ -7,12 +7,16 @@ contract('Tote', function(accounts) {
   afterEach('revert', reverter.revert);
 
   const asserts = Asserts(assert);
-  const OWNER = accounts[0];
+  const ADMIN = accounts[0];
   let money;
+  let _event;
+  let _bet;
 
   before('setup', () => {
     return Tote.deployed()
     .then(instance => money = instance)
+    .then(instance => _event = instance)
+    .then(instance => _bet = instance)
     .then(reverter.snapshot);
   });
 
@@ -20,9 +24,13 @@ contract('Tote', function(accounts) {
 
   it('should allow to create event', () => {
     console.log("CREATE EVENT");
-
+    var expected = [0, "One", "Two", 0, 0, 0, 0, "Undefined", "Open"];
+    return Promise.resolve()
+      .then(() => _event.create_event("One", "Two", {from: ADMIN}))
+      .then(assert.deepEqual(_event._event(1), expected));
   });
-  
+
+
   it('shold allow only for admin', () => {
 
 
