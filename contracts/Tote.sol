@@ -32,7 +32,7 @@ contract Tote {
 
     uint id = 1;
     uint bet_id = 1;
-    
+
     function Tote() {
         admin = msg.sender;
     }
@@ -64,9 +64,8 @@ contract Tote {
     }
 
     function create_event(string _team_A, string _team_B) onlyAdmin() {
-        _event[id]._status = "Open";
-        _event[id].team_A = _team_A;
-        _event[id].team_B = _team_B;
+        var new_event = Event(0, _team_A, _team_B, 0, 0, 0, 0, "Undefined", "Open");
+        _event[id] = new_event;
         Event_was_created(id, _team_A, _team_B);
         id ++;
     }
@@ -78,10 +77,8 @@ contract Tote {
     
     function make_bet(uint event_id, uint _bet_value, string _team) onlyNotAdmin() {
         valid(_event[event_id]._status, _team, _event[event_id].team_A, _event[event_id].team_B);
-        _bet[bet_id].gambler = msg.sender;
-        _bet[bet_id].bet_value = _bet_value;
-        _bet[bet_id].team = _team;
-        _bet[bet_id].event_id = event_id;
+        var new_bet = Bet(_bet_value, event_id, _team, msg.sender);
+        _bet[bet_id] = new_bet;
         if (sha3(_event[event_id].team_A) == sha3(_team)){
             _event[event_id].count_A ++;
             _event[event_id].value_A = _safeAdd(_event[event_id].value_A, _bet_value);
