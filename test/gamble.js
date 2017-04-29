@@ -8,15 +8,17 @@ contract('Tote', function(accounts) {
 
   const asserts = Asserts(assert);
   const ADMIN = accounts[0];
+  const gambler1 = accounts[1];
+  const gambler2 = accounts[2];
+  const gambler3 = accounts[3];
+  const gambler4 = accounts[4];
+  const gambler5 = accounts[5];
+  
   let money;
-  let _event;
-  let _bet;
 
   before('setup', () => {
     return Tote.deployed()
     .then(instance => money = instance)
-    .then(instance => _event = instance)
-    .then(instance => _bet = instance)
     .then(reverter.snapshot);
   });
 
@@ -24,67 +26,106 @@ contract('Tote', function(accounts) {
 
   it('should allow to create event', () => {
     console.log("CREATE EVENT");
-    var expected = [0, "One", "Two", 0, 0, 0, 0, "Undefined", "Open"];
     return Promise.resolve()
-      .then(() => _event.create_event("One", "Two", {from: ADMIN}))
-      .then(assert.deepEqual(_event._event(1), expected));
+    .then(() => money.create_event("Team A", "Team B", {from: ADMIN}))
+    .then(() => money.getA(0, {from: ADMIN}))
+    .then(asserts.equal("Team A"))
+    .then(() => money.getB(0, {from: ADMIN}))
+    .then(asserts.equal("Team B"))
   });
 
-
-  it('shold allow only for admin', () => {
-
-
-  });
+  /*it('shold allow only for admin', () => {
+    return Promise.resolve()
+    .then(() => money.create_event("Team A", "Team B", {from: gambler1}))
+    .then(() => money.getA(0, {from: ADMIN}))
+    .then(asserts.equal(null))
+    .then(() => money.getB(0, {from: ADMIN}))
+    .then(asserts.equal(null))
+  });*/
 
   it('should emit Event_was_created event', () => {
-
-
+    return Promise.resolve()
+    .then(() => money.create_event("Team A", "Team B", {from: ADMIN}))
+    .then(result => {
+      assert.equal(result.logs.length, 1);
+      assert.equal(result.logs[0].event, 'Event_was_created')
+    });;
   });
 
   //MAKE BET
 
   it('should allow to create bet', () => {
     console.log("MAKE BET");
-
+    return Promise.resolve()
+    .then(() => money.create_event("Team A", "Team B", {from: ADMIN}))
+    .then(() => money.make_bet(0, 500, "Team A", {from: gambler1}))
+    .then(() => money.getBet(0, {from: ADMIN}))
+    .then(asserts.equal(500))
   });
 
-  it('should fail when event ID is not exist', () => {
+  /*it('should fail when event ID is not exist', () => {
+    return Promise.resolve()
+    .then(() => money.create_event("Team A", "Team B", {from: ADMIN}))
+    .then(() => money.make_bet(1, 500, "Team A", {from: gambler1}))
+    .then(() => money.getBet(1, {from: ADMIN}))
+    .then(asserts.equal(null))
+  });*/
 
-
+  /*it('should fail when team is not exist', () => {
+    console.log("MAKE BET");
+    return Promise.resolve()
+    .then(() => money.make_bet(0, 500, "Team A", {from: gambler1}))
+    .then(() => money.getBet(0, {from: ADMIN}))
+    .then(asserts.equal(null))
   });
-
-  it('should fail when team is not exist', () => {
-
-
-  });
-  
+  *//*
   it('shold allow only for user', () => {
-
-
-  });
+    return Promise.resolve()
+    .then(() => money.create_event("Team A", "Team B", {from: ADMIN}))
+    .then(() => money.make_bet(0, 500, "Team A", {from: ADMIN}))
+    .then(() => money.getBet(0, {from: ADMIN}))
+    .then(asserts.equal(null))
+  });*/
 
   it('should emit Bet_was_created event', () => {
-
+    return Promise.resolve()
+    .then(() => money.create_event("Team A", "Team B", {from: ADMIN}))
+    .then(() => money.make_bet(0, 500, "Team A", {from: gambler1}))
+    .then(result => {
+      assert.equal(result.logs.length, 1);
+      assert.equal(result.logs[0].event, 'Bet_was_created')
+    });;
 
   });
 
-  it('should fail when event is closed', () => {
+  /*it('should fail when event is closed', () => {
 
 
-  });
+  });*/
 
   it('is count_TEAM increment works', () => {
-
-
+    return Promise.resolve()
+    .then(() => money.create_event("Team A", "Team B", {from: ADMIN}))
+    .then(() => money.make_bet(0, 500, "Team A", {from: gambler1}))
+    .then(() => money.make_bet(0, 1500, "Team A", {from: gambler1}))
+    .then(() => money.getBet(0, {from: ADMIN}))
+    .then(() => money.getCount(0, {from: ADMIN}))
+    .then(asserts.equal(2))
+    
   }); 
 
   it('is value_TEAM increment works', () => {
-
-
+    return Promise.resolve()
+    .then(() => money.create_event("Team A", "Team B", {from: ADMIN}))
+    .then(() => money.make_bet(0, 500, "Team A", {from: gambler1}))
+    .then(() => money.make_bet(0, 1500, "Team A", {from: gambler1}))
+    .then(() => money.getBet(0, {from: ADMIN}))
+    .then(() => money.getValue(0, {from: ADMIN}))
+    .then(asserts.equal(2000))
   });
 
   //NOMINATE WINNER
-
+/*
   it('should allow to nominate winner', () => {
     console.log("NOMINATE WINNER");
 
@@ -115,34 +156,30 @@ contract('Tote', function(accounts) {
 
   });
 
-  //BET SHOW
+  it('shold allow to pay money to winner', () => {
+    return Promise.resolve()
+    .then(() => money.create_event("Team A", "Team B", {from: ADMIN}))
+    .then(() => money.make_bet(0, 1000, "Team A", {from: gambler1}))
+    .then(() => money.make_bet(0, 200, "Team A", {from: gambler2}))
+    .then(() => money.make_bet(0, 400, "Team B", {from: gambler3}))
+    .then(() => money.make_bet(0, 600, "Team B", {from: gambler4}))
+    .then(() => money.make_bet(0, 3200, "Team A", {from: gambler5}))
+    .then(() => money.nominate_winner(0, "Team A", {from: ADMIN}));
+    .then(() => money.money(gambler1))
+    .then(asserts.equal(1204));
+    .then(() => money.money(gambler2))
+    .then(asserts.equal(240));
+    .then(() => money.money(gambler5))
+    .then(asserts.equal(3854));
+  });
 
-  it('should allow to show event info', () => {
-    console.log("EVENT SHOW");
+  it('shold allow to pay money to admin', () => {
 
 
   });
-
-  it('should fail when event ID is not exist', () => {
-
-
-  });
-
-  //BET SHOW
-
-  it('should allow to show bet info', () => {
-    console.log("BET SHOW");
-
-
-  });
-
-  it('should fail when bet ID is not exist', () => {
-
-
-  });
-
+*/
   //MONEY SHOW
-
+/*
   it('should allow to show money', () => {
     console.log("MONEY SHOW");
 
@@ -153,7 +190,7 @@ contract('Tote', function(accounts) {
 
 
   });
-
+*/
   //OTHER
 
   it('soon...', () => {
