@@ -10,19 +10,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lastperson/ethse.git"
+    "url": "git+https://github.com/Alek12313/ethereum_course_task_5"
   },
   "keywords": [
     "ethereum",
     "solidity",
     "truffle"
   ],
-  "author": "Oleksii Matiiasevych <oleksii@ambisafe.co>",
+  "author": "Alexey Shendrick",
   "license": "LGPL-3.0",
   "bugs": {
-    "url": "https://github.com/lastperson/ethse/issues"
+    "url": "https://github.com/Alek12313/ethereum_course_task_5"
   },
-  "homepage": "https://github.com/lastperson/ethse#readme",
+  "homepage": "https://github.com/Alek12313/ethereum_course_task_5#readme",
   "dependencies": {
     "bluebird": "^3.5.0",
     "ethereumjs-testrpc": "^3.0.3",
