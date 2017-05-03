@@ -9,8 +9,10 @@ contract Tote {
         uint count_B;
         uint value_A;
         uint value_B;
+        uint bet_count;
         string winner;
         string _status;
+        mapping(uint => Bet) _bet;
     }
 
     struct Bet {
@@ -21,7 +23,6 @@ contract Tote {
     }
 
     Event[] public _event;
-    Bet[] public _bet;
 
     address public admin;
     mapping(address => uint) public money;
@@ -29,6 +30,7 @@ contract Tote {
     event Event_was_created(string b, string c);
     event Bet_was_created(address c, uint a, uint b, string l);
     event Event_was_closed(string wn);
+    event The_money_was_given_out(uint k);
 
     function Tote() {
         admin = msg.sender;
@@ -72,15 +74,11 @@ contract Tote {
         return c;
     }
 
-
-    function valid(string x, string y, string f, string e) internal {
-        if (sha3(x) != sha3("Open")) throw;
-        if (sha3(f) != sha3(y) && sha3(e) != sha3(y)) throw;
+    function check(string ev_status, string input, string name1, string name2) internal {
+        if (sha3(ev_status) != sha3("Open")) throw;
+        if (sha3(name1) != sha3(input) && sha3(name2) != sha3(input)) throw;
     }
-
-    function delete_event(uint event_id) internal {
-        _event[event_id]._status = "Close";
-    }
+    
 
     function increment(uint event_id, string _team, uint _bet_value ) internal {
         if (sha3(_event[event_id].team_A) == sha3(_team)){
@@ -105,10 +103,11 @@ contract Tote {
         return _event[k]._status;
     } 
 
-    function getBet(uint k) public constant returns (uint) {
-        return _bet[k].bet_value;
-    } 
-
+    function getBet(uint evid, uint betid) public constant returns (uint) {
+        var bet = _event[evid];
+        return bet._bet[betid].bet_value;
+    }
+    
     function getCountA(uint k) public constant returns (uint) {
         return _event[k].count_A;
     } 
@@ -123,53 +122,60 @@ contract Tote {
 
     function getValueB(uint k) public constant returns (uint) {
         return _event[k].value_B;
-    } 
+    }
 
     function create_event(string _team_A, string _team_B) onlyAdmin() {
-        var new_event = Event(_team_A, _team_B, 0, 0, 0, 0, "Undefined", "Open");
+        var new_event = Event(_team_A, _team_B, 0, 0, 0, 0, 0, "Undefined", "Open");
         _event.push(new_event);
         Event_was_created(_team_A, _team_B);
     }
 
     function make_bet(uint event_id, uint _bet_value, string _team) onlyNotAdmin() {
-        valid(_event[event_id]._status, _team, _event[event_id].team_A, _event[event_id].team_B);
+        check(_event[event_id]._status, _team, _event[event_id].team_A, _event[event_id].team_B);
+        var bet = _event[event_id];
         var new_bet = Bet(_bet_value, event_id, _team, msg.sender);
-        _bet.push(new_bet);
+        bet._bet[_event[event_id].bet_count] = new_bet;
         increment(event_id, _team, _bet_value);
         money[this] = _safeAdd(money[this], _bet_value);
         Bet_was_created(msg.sender, event_id, _bet_value, _team);
+        _event[event_id].bet_count ++;
     }
-    
-    function nominate_winner(uint event_id, string _winner) onlyAdmin() {
+ 
+    function close_event(uint event_id, string _winner) onlyAdmin() {
+        check(_event[event_id]._status, _winner, _event[event_id].team_A, _event[event_id].team_B);
+        _event[event_id]._status = "Closed";
+        _event[event_id].winner = _winner;
+        Event_was_closed(_winner);
+    }
+
+    function give_out_money(uint event_id) onlyAdmin() {
+        if (sha3(_event[event_id]._status) != sha3("Closed")) throw;
         uint rest = 0;
         uint win = 0;
         uint cash = 0;
         uint _x = 0;
+        var bet = _event[event_id];
         uint event_value = money[this];
-        uint count = _safeAdd(_event[event_id].count_A, _event[event_id].count_B);
-        valid(_event[event_id]._status, _winner, _event[event_id].team_A, _event[event_id].team_B);
-        for (uint i = 0; i <= _safeSub(count, 1); i++) {
-            if(sha3(_bet[i].team) != sha3(_winner)) {
-                win = _safeAdd(win,_bet[i].bet_value);
+        for (uint i = 0; i <= _safeSub(_event[event_id].bet_count, 1); i++) {
+            if(sha3(bet._bet[i].team) != sha3(_event[event_id].winner)) {
+                win = _safeAdd(win,bet._bet[i].bet_value);
             }
             else{
-                money[_bet[i].gambler] = _safeAdd(money[_bet[i].gambler], _bet[i].bet_value);
+                money[bet._bet[i].gambler] = _safeAdd(money[bet._bet[i].gambler], bet._bet[i].bet_value);
             }
         }
         rest = _safeDiv(win, 10);
         event_value = _safeSub(event_value, win);
         money[admin] = rest;
         win = _safeSub(win, rest);
-        for (uint j = 0; j <= _safeSub(count, 1); j++) {
-            if(sha3(_bet[j].team) == sha3(_winner)) { 
-                _x = _bet[j].bet_value * win;
+        for (uint j = 0; j <= _safeSub(_event[event_id].bet_count, 1); j++) {
+            if(sha3(bet._bet[j].team) == sha3(_event[event_id].winner)) { 
+                _x = bet._bet[j].bet_value * win;
                 cash = _safeDiv(_x, event_value);
-                money[_bet[j].gambler] = _safeAdd(money[_bet[j].gambler], cash);
+                money[bet._bet[j].gambler] = _safeAdd(money[bet._bet[j].gambler], cash);
                 money[this] = _safeSub(money[this], cash);
             }
         }
-        _event[event_id].winner = _winner;    
-        delete_event(event_id);
-        Event_was_closed(_winner); 
+        The_money_was_given_out(event_id);
     }
 }

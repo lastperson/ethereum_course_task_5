@@ -51,7 +51,7 @@ contract('Tote', function(accounts) {
     return Promise.resolve()
     .then(() => money.create_event("Team A", "Team B", {from: ADMIN}))
     .then(() => money.make_bet(0, 500, "Team A", {from: gambler1}))
-    .then(() => money.getBet(0, {from: ADMIN}))
+    .then(() => money.getBet(0, 0, {from: ADMIN}))
     .then(asserts.equal(500));
   });
 
@@ -102,32 +102,28 @@ contract('Tote', function(accounts) {
     .then(asserts.equal(2000));
   });
 
-  //NOMINATE WINNER
+  //CLOSE EVENT
 
-  it('should allow to nominate winner', () => {
-    console.log("NOMINATE WINNER");
+  it('should allow to close event', () => {
+    console.log("CLOSE EVENT");
     return Promise.resolve()
     .then(() => money.create_event("Team A", "Team B", {from: ADMIN}))
-    .then(() => money.make_bet(0, 1000, "Team A", {from: gambler1}))
-    .then(() => money.make_bet(0, 200, "Team A", {from: gambler2}))
-    .then(() => money.make_bet(0, 400, "Team B", {from: gambler3}))
-    .then(() => money.nominate_winner(0, "Team A", {from: ADMIN}))
+    .then(() => money.close_event(0, "Team A", {from: ADMIN}))
     .then(() => money.getStatus(0, {from: ADMIN}))
-    .then(asserts.equal("Close"));
+    .then(asserts.equal("Closed"));
   });
 
   it('should emit Event_was_closed event', () => {
     return Promise.resolve()
     .then(() => money.create_event("Team A", "Team B", {from: ADMIN}))
-    .then(() => money.make_bet(0, 1000, "Team A", {from: gambler1}))
-    .then(() => money.make_bet(0, 200, "Team A", {from: gambler2}))
-    .then(() => money.make_bet(0, 400, "Team B", {from: gambler3}))
-    .then(() => money.nominate_winner(0, "Team A", {from: ADMIN}))
+    .then(() => money.close_event(0, "Team A", {from: ADMIN}))
     .then(result => {
       assert.equal(result.logs.length, 1);
       assert.equal(result.logs[0].event, 'Event_was_closed')
     });
   });
+
+  //GIVING OUT
 
   it('shold allow to pay money to winner', () => {
     return Promise.resolve()
@@ -137,7 +133,8 @@ contract('Tote', function(accounts) {
     .then(() => money.make_bet(0, 400, "Team B", {from: gambler3}))
     .then(() => money.make_bet(0, 600, "Team B", {from: gambler4}))
     .then(() => money.make_bet(0, 3200, "Team A", {from: gambler5}))
-    .then(() => money.nominate_winner(0, "Team A", {from: ADMIN}))
+    .then(() => money.close_event(0, "Team A", {from: ADMIN}))
+    .then(() => money.give_out_money(0, {from: ADMIN}))
     .then(() => money.money(gambler1))
     .then(asserts.equal(1204))
     .then(() => money.money(gambler2))
@@ -154,7 +151,8 @@ contract('Tote', function(accounts) {
     .then(() => money.make_bet(0, 400, "Team B", {from: gambler3}))
     .then(() => money.make_bet(0, 600, "Team B", {from: gambler4}))
     .then(() => money.make_bet(0, 3200, "Team A", {from: gambler5}))
-    .then(() => money.nominate_winner(0, "Team A", {from: ADMIN}))
+    .then(() => money.close_event(0, "Team A", {from: ADMIN}))
+    .then(() => money.give_out_money(0, {from: ADMIN}))
     .then(() => money.money(ADMIN))
     .then(asserts.equal(100));
   });
