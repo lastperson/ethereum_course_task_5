@@ -24,7 +24,6 @@ contract Tote {
     }
 
     Event[] public _event;
-    string boof;
     address public admin;
     mapping(address => uint) public money;
     
