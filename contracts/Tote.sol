@@ -141,6 +141,7 @@ contract Tote {
         uint _x = 0;
         var bet = _event[event_id];
         uint event_value = _event[event_id]._balance;
+        // If there will be milloins of bets, transaction will always fail by out of gas.
         for (uint i = 0; i <= _safeSub(_event[event_id].bet_count, 1); i++) {
             if(sha3(bet._bet[i].team) != sha3(_event[event_id].winner)) {
                 win = _safeAdd(win, bet._bet[i].bet_value);
@@ -155,6 +156,7 @@ contract Tote {
         money[admin] = _safeAdd(money[admin], rest);
         money[this] = _safeSub(money[this], rest);
         win = _safeSub(win, rest);
+        // If there will be milloins of bets, transaction will always fail by out of gas.
         for (uint j = 0; j <= _safeSub(_event[event_id].bet_count, 1); j++) {
             if(sha3(bet._bet[j].team) == sha3(_event[event_id].winner)) { 
                 _x = bet._bet[j].bet_value * win;
@@ -163,11 +165,13 @@ contract Tote {
                 money[this] = _safeSub(money[this], cash);
             }
         }
+        // So all the rounding leftovers will be forever locked in the contract?
         _event[event_id]._balance = 0;
         The_money_was_given_out(event_id);
         return true;
     }
 
+    // After winning, how to get ETH from the contract back to bettor?
 
     function getA(uint k) public constant returns (string) {
         return _event[k].team_A;
